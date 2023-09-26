@@ -9,7 +9,6 @@ export class ProductUseCase {
   }
 
   async viewProduct(id: string): Promise<Product> {
-    console.log(id);
     return this.productRepository.getProductById(id);
   }
 

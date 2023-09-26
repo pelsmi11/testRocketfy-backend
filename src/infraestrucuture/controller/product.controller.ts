@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { ProductUseCase } from "../../application/productUseCase";
+import { Product } from "../../domain/product.entity";
 
 export class ProductController {
   constructor(private productUseCase: ProductUseCase) {}
@@ -38,8 +39,15 @@ export class ProductController {
 
   async modifyProduct(req: Request, res: Response) {
     try {
-      console.log({ message: "hola", body: req.body });
-      const updatedProduct = await this.productUseCase.modifyProduct(req.body);
+      const productId = req.params.id;
+      const productData: Product = {
+        ...req.body,
+        id: productId,
+      };
+
+      const updatedProduct = await this.productUseCase.modifyProduct(
+        productData
+      );
       if (!updatedProduct) {
         res.status(404).json({ message: "Product not found." });
         return;
@@ -54,7 +62,7 @@ export class ProductController {
     const { id } = req.params;
     try {
       await this.productUseCase.removeProduct(id);
-      res.status(204).send();
+      res.status(204).json({ message: `product id ${id} removed` });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

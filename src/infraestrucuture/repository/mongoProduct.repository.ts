@@ -73,12 +73,33 @@ export class MongoRepository implements ProductRepository {
     // Add to price and stock history before updating
     const oldProduct = await this.getProductById(product.id);
     if (oldProduct.price !== product.price) {
-      product.priceHistory.push({ date: new Date(), price: product.price });
-    }
-    if (oldProduct.stock !== product.stock) {
-      product.stockHistory.push({ date: new Date(), stock: product.stock });
+      if (!product.priceHistory) {
+        product.priceHistory = [];
+      }
+      product.priceHistory = [
+        ...oldProduct.priceHistory,
+        {
+          date: new Date(),
+          price: product.price,
+        },
+      ];
+      // product.priceHistory.push({ date: new Date(), price: product.price });
     }
 
+    if (oldProduct.stock !== product.stock) {
+      if (!product.stockHistory) {
+        product.stockHistory = [];
+      }
+      product.stockHistory = [
+        {
+          date: new Date(),
+          stock: product.stock,
+        },
+        ...oldProduct.stockHistory,
+      ];
+      // product.stockHistory.push({ date: new Date(), stock: product.stock });
+    }
+    console.log(product);
     const updatedProduct = await ProductModel.findByIdAndUpdate(
       product.id,
       product,
