@@ -1,0 +1,103 @@
+import mongoose from "mongoose";
+import { ProductRepository } from "../../domain/product.repository";
+import { Product } from "../../domain/product.entity";
+
+const productSchema = new mongoose.Schema(
+  {
+    name: String,
+    description: String,
+    sku: String,
+    imageUrl: String,
+    tags: [String],
+    price: Number,
+    stock: Number,
+    priceHistory: [
+      {
+        date: Date,
+        price: Number,
+      },
+    ],
+    stockHistory: [
+      {
+        date: Date,
+        stock: Number,
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+interface ProductDocument extends mongoose.Document {
+  name: string;
+  description: string;
+  sku: string;
+  imageUrl: string;
+  tags: string[];
+  price: number;
+  stock: number;
+  priceHistory: { date: Date; price: number }[];
+  stockHistory: { date: Date; stock: number }[];
+}
+
+const ProductModel = mongoose.model<ProductDocument>("Product", productSchema);
+
+export class MongoRepository implements ProductRepository {
+  constructor() {
+    mongoose.connect(
+      process.env.MONGO_URL || "mongodb://localhost:27017/mydatabase"
+    );
+  }
+
+  async getAllProducts(): Promise<Product[]> {
+    const products = await ProductModel.find().exec();
+    return products.map((product) => product.toObject());
+  }
+
+  async getProductById(id: string): Promise<Product> {
+    const product = await ProductModel.findById(id).exec();
+    if (!product) {
+      throw new Error("Product not found");
+    }
+    return product.toObject();
+  }
+
+  async createProduct(product: Product): Promise<Product> {
+    const newProduct = new ProductModel(product);
+    const savedProduct = await newProduct.save();
+    return savedProduct.toObject();
+  }
+
+  async updateProduct(product: Product): Promise<Product> {
+    // Add to price and stock history before updating
+    const oldProduct = await this.getProductById(product.id);
+    if (oldProduct.price !== product.price) {
+      product.priceHistory.push({ date: new Date(), price: product.price });
+    }
+    if (oldProduct.stock !== product.stock) {
+      product.stockHistory.push({ date: new Date(), stock: product.stock });
+    }
+
+    const updatedProduct = await ProductModel.findByIdAndUpdate(
+      product.id,
+      product,
+      {
+        new: true,
+      }
+    ).exec();
+
+    if (!updatedProduct) {
+      throw new Error("Error updating the product");
+    }
+
+    return updatedProduct.toObject();
+  }
+
+  async deleteProduct(id: string): Promise<void> {
+    const result = await ProductModel.findByIdAndDelete(id).exec();
+    if (!result) {
+      throw new Error("Error deleting the product or product not found");
+    }
+  }
+}
