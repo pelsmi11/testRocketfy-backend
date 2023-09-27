@@ -99,7 +99,6 @@ export class MongoRepository implements ProductRepository {
       ];
       // product.stockHistory.push({ date: new Date(), stock: product.stock });
     }
-    console.log(product);
     const updatedProduct = await ProductModel.findByIdAndUpdate(
       product.id,
       product,

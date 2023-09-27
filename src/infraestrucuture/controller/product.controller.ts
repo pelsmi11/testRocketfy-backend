@@ -62,7 +62,7 @@ export class ProductController {
     const { id } = req.params;
     try {
       await this.productUseCase.removeProduct(id);
-      res.status(204).json({ message: `product id ${id} removed` });
+      res.status(200).json({ message: `product id ${id} removed` });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
