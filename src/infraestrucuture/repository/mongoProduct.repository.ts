@@ -104,6 +104,8 @@ export class MongoRepository implements ProductRepository {
         },
       ];
       // product.priceHistory.push({ date: new Date(), price: product.price });
+    } else {
+      product.priceHistory = oldProduct.priceHistory;
     }
 
     if (oldProduct.stock !== product.stock) {
@@ -118,7 +120,10 @@ export class MongoRepository implements ProductRepository {
         ...oldProduct.stockHistory,
       ];
       // product.stockHistory.push({ date: new Date(), stock: product.stock });
+    } else {
+      product.stockHistory = oldProduct.stockHistory;
     }
+
     const updatedProduct = await ProductModel.findByIdAndUpdate(
       product.id,
       product,
