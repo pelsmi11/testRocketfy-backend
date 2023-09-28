@@ -1,13 +1,36 @@
 import { Request, Response } from "express";
 import { ProductUseCase } from "../../application/productUseCase";
 import { Product } from "../../domain/product.entity";
+import { queryParams } from "../../interfaces/queryParams.interface";
 
 export class ProductController {
   constructor(private productUseCase: ProductUseCase) {}
 
-  async listAllProducts(_req: Request, res: Response) {
+  async listAllProducts(req: Request, res: Response) {
+    const maxPrice = req.query.maxPrice
+      ? parseFloat(req.query.maxPrice as string)
+      : undefined;
+    const minPrice = req.query.minPrice
+      ? parseFloat(req.query.minPrice as string)
+      : undefined;
+    const searchTerm = req.query.searchTerm as string;
+    let tags: string[] | undefined;
+    if (Array.isArray(req.query.tags)) {
+      tags = (req.query.tags as string[]).filter(
+        (tag) => typeof tag === "string"
+      );
+    } else if (typeof req.query.tags === "string") {
+      tags = [req.query.tags];
+    }
+
+    const searchParams: queryParams = {
+      maxPrice,
+      minPrice,
+      searchTerm,
+      tags,
+    };
     try {
-      const products = await this.productUseCase.listAllProducts();
+      const products = await this.productUseCase.listAllProducts(searchParams);
       res.status(200).json(products);
     } catch (error: any) {
       res.status(500).json({ message: error.message });

@@ -1,11 +1,12 @@
 import { Product } from "../domain/product.entity";
 import { ProductRepository } from "../domain/product.repository";
+import { queryParams } from "../interfaces/queryParams.interface";
 
 export class ProductUseCase {
   constructor(private readonly productRepository: ProductRepository) {}
 
-  async listAllProducts(): Promise<Product[]> {
-    return this.productRepository.getAllProducts();
+  async listAllProducts(queriesParams?: queryParams): Promise<Product[]> {
+    return this.productRepository.getAllProducts(queriesParams);
   }
 
   async viewProduct(id: string): Promise<Product> {

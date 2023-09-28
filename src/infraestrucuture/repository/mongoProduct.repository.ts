@@ -1,6 +1,7 @@
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import { ProductRepository } from "../../domain/product.repository";
 import { Product } from "../../domain/product.entity";
+import { queryParams } from "../../interfaces/queryParams.interface";
 
 const productSchema = new mongoose.Schema(
   {
@@ -50,8 +51,27 @@ export class MongoRepository implements ProductRepository {
     );
   }
 
-  async getAllProducts(): Promise<Product[]> {
-    const products = await ProductModel.find().exec();
+  async getAllProducts(queriesParams?: queryParams): Promise<Product[]> {
+    const query: FilterQuery<ProductDocument> = {};
+    if (queriesParams?.searchTerm) {
+      query["$or"] = [
+        { name: new RegExp(queriesParams.searchTerm, "i") },
+        { description: new RegExp(queriesParams.searchTerm, "i") },
+      ];
+    }
+
+    if (queriesParams?.tags && queriesParams?.tags.length) {
+      query["tags"] = { $in: queriesParams.tags };
+    }
+
+    if (queriesParams?.minPrice != null) {
+      query["price"] = { ...query["price"], $gte: queriesParams.minPrice };
+    }
+
+    if (queriesParams?.maxPrice != null) {
+      query["price"] = { ...query["price"], $lte: queriesParams.maxPrice };
+    }
+    const products = await ProductModel.find(query).exec();
     return products.map((product) => product.toObject());
   }
 
