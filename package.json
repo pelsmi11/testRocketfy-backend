@@ -7,8 +7,8 @@
     "build": "tsc",
     "create-env": "printenv > .env",
     "dev": "nodemon",
-    "serve": "node dist/upload.app.js",
-    "start": "node dist/upload.app.js"
+    "serve": "node dist/app.js",
+    "start": "node dist/app.js"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const product_controller_1 = require("../controller/product.controller");
+const mongoProduct_repository_1 = require("../repository/mongoProduct.repository");
+const productUseCase_1 = require("../../application/productUseCase");
+const route = (0, express_1.Router)();
+const mongoRepo = new mongoProduct_repository_1.MongoRepository();
+const productUseCase = new productUseCase_1.ProductUseCase(mongoRepo);
+const productController = new product_controller_1.ProductController(productUseCase);
+route.get("/products", productController.listAllProducts.bind(productController));
+route.get("/products/:id", productController.viewProduct.bind(productController));
+route.post("/products", productController.addProduct.bind(productController));
+route.put("/products/:id", productController.modifyProduct.bind(productController));
+route.delete("/products/:id", productController.removeProduct.bind(productController));
+exports.default = route;
