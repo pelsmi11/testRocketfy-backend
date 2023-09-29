@@ -24,6 +24,7 @@ Key Benefits:
 - **Express.js** for the API framework.
 - **TypeScript** for static typing.
 - **MongoDB** as the primary database
+- **Cloudinary** for uploading images
 
 ## Getting Started
 
